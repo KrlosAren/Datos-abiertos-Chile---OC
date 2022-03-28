@@ -17,6 +17,7 @@ class TransformFiles:
         self._initial = initial.replace('-', '_')
         self._ending = ending.replace('-', '_')
         self._folder_path = folder_path
+        self._base_dir = os.path.normpath(os.getcwd() + os.sep + os.pardir)
         self._files = []
         self._df = pd.DataFrame()
 
@@ -46,7 +47,7 @@ class TransformFiles:
                     f'{self._folder_path}')
                 logger.info(f'Archivo {file} descomprimido')
 
-                # os.remove(file['path'])
+                os.remove(file['path'])
 
     def _transform_datetime(self, df):
         df['FechaCreacion'] = pd.to_datetime(df['FechaCreacion'])
@@ -137,7 +138,7 @@ class TransformFiles:
         df = df.reset_index(drop=True)
 
         self._df = pd.concat([self._df, df], ignore_index=True)
-        # os.remove(file['path'])
+        os.remove(file['path'])
 
     def _clean_all_files(self):
         for file in self._files:
@@ -146,8 +147,7 @@ class TransformFiles:
     def _save_merged_df(self):
         logger.info('Guardando archivo de datos')
         _date = datetime.now().strftime('%Y_%m_%d')
-        _clean_folder = os.getcwd() + '/clean_data'
-        self._df.to_csv(f'{_clean_folder}/{self._initial}_{self._ending}_clean_.csv',
+        self._df.to_csv(f'{self._base_dir}/clean_data/{self._initial}_{self._ending}_{_date}_clean_.csv',
                         index=False, encoding='latin1')
 
     def _run(self):
