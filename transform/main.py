@@ -2,6 +2,7 @@ import argparse
 import logging
 import os
 import zipfile
+from datetime import datetime
 
 import numpy as np
 import pandas as pd
@@ -12,7 +13,9 @@ logger = logging.getLogger(__name__)
 
 class TransformFiles:
 
-    def __init__(self, folder_path):
+    def __init__(self, folder_path, initial, ending):
+        self._initial = initial.replace('-', '_')
+        self._ending = ending.replace('-', '_')
         self._folder_path = folder_path
         self._files = []
         self._df = pd.DataFrame()
@@ -141,7 +144,10 @@ class TransformFiles:
             self._clean_data(file)
 
     def _save_merged_df(self):
-        self._df.to_csv(f'{self._folder_path}/merged.csv',
+        logger.info('Guardando archivo de datos')
+        _date = datetime.now().strftime('%Y_%m_%d')
+        _clean_folder = os.getcwd() + '/clean_data'
+        self._df.to_csv(f'{_clean_folder}/{self._initial}_{self._ending}_clean_.csv',
                         index=False, encoding='latin1')
 
     def _run(self):
@@ -153,10 +159,10 @@ class TransformFiles:
         self._save_merged_df()
 
 
-def main(path):
+def main(path, initial, ending):
 
     logger.info(f'Path: {path}')
-    _transform = TransformFiles(path)
+    _transform = TransformFiles(path, initial, ending)
     _transform._run()
 
 
@@ -164,5 +170,9 @@ if __name__ == '__main__':
     argparser = argparse.ArgumentParser()
     argparser.add_argument(
         'path', help='Path to folder with files', type=str)
+    argparser.add_argument(
+        'initial', help='Initial date', type=str)
+    argparser.add_argument(
+        'ending', help='Ending date', type=str)
     args = argparser.parse_args()
-    main(args.path)
+    main(args.path, args.initial, args.ending)
